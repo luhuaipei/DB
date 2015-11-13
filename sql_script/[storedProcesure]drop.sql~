@@ -1,0 +1,19 @@
+DROP procedure IF EXISTS `dropClass`;
+DELIMITER //
+CREATE PROCEDURE dropClass
+(IN userId int(11),
+ IN classNum varchar(10),
+ IN quarter char(10),
+ IN inputyear char(10))
+Begin
+START TRANSACTION;
+DELETE FROM transcript WHERE StudId = userId
+AND UoSCode = classNum
+AND Grade is NULL 
+
+UPDATE uosoffering SET Enrollment = Enrollment - 1 
+where UoSCode=classId AND Semester = quarter AND uosoffering.Year = inputyear;
+
+COMMIT;
+END //
+DELIMITER ;

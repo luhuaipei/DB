@@ -1,0 +1,36 @@
+DROP procedure IF EXISTS `enroll`;
+delimiter //
+CREATE procedure enroll(
+IN userId int(11),
+IN classId char(8),
+IN year int(11),
+OUT pre int(8))
+
+Begin 
+
+DECLARE preCour char(8);
+DECLARE quarter char(2);
+DECLARE numOfPre int(8);
+DECLARE passedPre int(8);
+
+SELECT count(*) INTO numOfPre
+	from requires where UoSCode = classId;
+
+SELECT Semester INTO quarter 
+	from whenoffered where UoSCode=classId;
+
+SELECT count(*) into passedPre FROM transcript
+			WHERE UoSCode = preCour  #TODO : not fail, multiple Prereq
+			AND Grade is not null
+            AND Grade != 'F';
+
+if passedPre = numOfPre THEN
+	START TRANSACTION; 
+    INSERT INTO transcript VALUES(userId,classId,quarter,year,NULL);
+    UPDATE uosoffering SET Enrollment = Enrollment + 1 where UoSCode=classId;
+    SET pre = NULL;
+    COMMIT;
+    else 
+		set pre = numOfPre;
+    END IF;
+end;

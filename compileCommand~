@@ -1,0 +1,11 @@
+gcc createdb.c -o createdb -std=c99  `mysql_config --cflags --libs`
+
+add sub dir to header search scope
+gcc main.c -o main -std=c99  `mysql_config --cflags --libs` -I/home/huaipei/dbproj3/file
+
+gcc main.c -o main -std=c99  `mysql_config --cflags --libs`
+
+
+execute script file 
+ \. /home/huaipei/dbproj3/1.sql
+
