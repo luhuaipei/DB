@@ -33,49 +33,56 @@ char* processQuery(char* query, char* userPart,int flag);
 bool checkCourse(char* userID,Qtr* queryTime,char* courseNum);
 bool enrollDB(char * query);
 void checkTrigger();
-//-------------------------------------------------
-// void initDB(){
-// 	char* changeADDR= readQuery("./sql_script/[SP]changeADDR.sql");
-// 	printf("1\n");
-// 	char* changePW= readQuery("./sql_script/[SP]changePW.sql");
-// 	printf("2\n");
-// 	char* enroll= readQuery("./sql_script/[SP]enroll.sql");
-// 	printf("3\n");
-// 	char* drop= readQuery("./sql_script/[SP]drop.sql");
-// 	printf("4\n");
-// 	char* enoughtStu = readQuery("./sql_script/[TGR]enoughStu.sql");
-// 	printf("5\n");
-// 	MYSQL *conn = mysql_init(NULL);
-// 	if(conn == NULL){
-// 		fprintf(stderr,"mysql_init() failed\n");
-// 		exit(1);
-// 	}
-// 	if (mysql_real_connect(conn, "localhost", "root", "lhp920428",
-// 		"project3-nudb", 0, NULL, 0) == NULL){
-// 		finish_with_error(conn);
-// 	}
-// 	if(mysql_query(conn, changeADDR)){
-// 		finish_with_error(conn);
-// 		}
-// 	if(mysql_query(conn, changePW)){
-// 		finish_with_error(conn);
-// 		}
-// 	if(mysql_query(conn, enroll)){
-// 		finish_with_error(conn);
-// 		}
-// 	if(mysql_query(conn, drop)){
-// 		finish_with_error(conn);
-// 		}
-// 	if(mysql_query(conn, enoughtStu)){
-// 		finish_with_error(conn);
-// 		}
-// 	mysql_close(conn);
 
-
-// }
+void initDB(){
+	char* changeADDR= readQuery("./sql_script/[SP]changeADDR.sql");
+//	printf("1\n");
+	char* changePW= readQuery("./sql_script/[SP]changePW.sql");
+//	printf("2\n");
+	char* enroll= readQuery("./sql_script/[SP]enroll.sql");
+//	printf("3\n");
+	char* drop= readQuery("./sql_script/[SP]drop.sql");
+//	printf("4\n");
+	char* enoughtStu = readQuery("./sql_script/[TGR]enoughStu.sql");
+//	printf("5\n");
+	MYSQL *conn = mysql_init(NULL);
+	if(conn == NULL){
+		fprintf(stderr,"mysql_init() failed\n");
+		exit(1);
+	}
+	if (mysql_real_connect(conn, "localhost", "root", "lhp920428",
+		"project3-nudb", 0, NULL, 0) == NULL){
+		finish_with_error(conn);
+	}
+    mysql_query(conn,"DROP procedure IF EXISTS `changeADDR`;");
+	if(mysql_query(conn, changeADDR)){
+		finish_with_error(conn);
+		}
+    mysql_query(conn,"DROP procedure IF EXISTS `changePW`;");    
+	if(mysql_query(conn, changePW)){
+		finish_with_error(conn);
+		}
+    mysql_query(conn,"DROP procedure IF EXISTS `enroll`;");    
+	if(mysql_query(conn, enroll)){
+		finish_with_error(conn);
+		}
+    mysql_query(conn,"DROP procedure IF EXISTS `dropClass`;");    
+	if(mysql_query(conn, drop)){
+		finish_with_error(conn);
+		}
+    mysql_query(conn,"DROP table IF EXISTS `monitor`;");    
+    mysql_query(conn,"DROP trigger IF EXISTS `enoughStu`;");
+    mysql_query(conn,"create table monitor(Num int(8),UoSCode char(8),Semester char(8),Year char(8),flag int(3),PRIMARY KEY (Num));");
+    mysql_query(conn,"insert into monitor values(1,NULL,NULL,NULL,0);");                        
+	if(mysql_query(conn, enoughtStu)){
+		finish_with_error(conn);
+		}
+	mysql_close(conn);
+    printf("Initialized succssfully.\n");
+}
 int main()
 {
-//	initDB();
+	initDB();
     while(1) {
         printf("-----------------Welcome to My Ceasar-----------------\n\n");
         printf("1. Login\n");
@@ -108,8 +115,7 @@ void loggin()
     printf("Please Use your User name and password to login\n");
     char userID[USERID_LENGTH];  //length of userID
     char password[PASSWORD_LENGTH]; //length of password
-    //TODO: userID and password need to be processed,drop space
-
+   
     printf("UserID:");
     scanf("%s",userID);
     printf("Your ID: %s\n",userID);
@@ -299,23 +305,32 @@ void queryDB(char* query, int mode)
         for(int j = 0 ; j < num_fields; j++) {
             field_size= fields[j].max_length;
             for(m=0; m<field_size/2; m++) {
-                printf(" ");
+         //       printf(" ");
             }
-            printf("%s",fields[j].name);
+            if(j==0){
+                printf("%s",fields[j].name);                
+            }else{
+                printf("%20s",fields[j].name);
+            }
             for(m=0; m<field_size/2; m++) {
-                printf(" ");
+         //       printf(" ");
             }
         }
         printf("\n-------------------------------------------------------\n");
         while ((row = mysql_fetch_row(result))) {
             for(int i = 0; i < num_fields; i++) {
                 field_size=fields[i].max_length;
-                for(m=0; m<field_size/1.5; m++) {
-                    printf(" ");
+                for(m=0; m<field_size/2; m++) {
+         //           printf(" ");
                 }
-                printf("%s", row[i] ? row[i] : "NULL");
-                for(m=0; m<field_size/1.5; m++) {
+                if (i==0){
+                  printf("%2s", row[i] ? row[i] : "NULL");                    
+                }else{
                     printf(" ");
+                    printf("%20s", row[i] ? row[i] : "NULL");                    
+                }
+                for(m=0; m<field_size/2; m++) {
+         //           printf(" ");
                 }
             }
             printf("\n");
@@ -464,7 +479,6 @@ void personalDetl(char* userID)
                         //update table to new password
                         //form update query
                         query = readQuery("./sql_script/updatePassword.sql");
-                        //TODO: 2 argument
                         query_after_process = processQuery(query,userID,1);
                         query_after_process = processQuery(query_after_process,newPassword,2);
                         queryDB(query_after_process,0);
@@ -490,7 +504,6 @@ void personalDetl(char* userID)
                     //update table to newaddr, using transaction
                     //read query from file
                     query = readQuery("./sql_script/updateAddr.sql");
-                    //TODO: 3rd argument
                     query_after_process = processQuery(query,userID,1);
                     query_after_process = processQuery(query_after_process,newAddr,2);
                     queryDB(query_after_process,0);
@@ -608,12 +621,13 @@ void enrollPage(char* userID)
             enrollSucceed = enrollDB(query_after_process);
             free(query);
             free(query_after_process);
+            //TODO: CHECK THE different cases of unsucceefully enroll.  >maximum enroll or not meet the requirement.
             if (!enrollSucceed) {
                 printf("\n\nYou can't be enrolled in this course.\n");
                 printf("Because you don't meet the requirement\n");
-
                 query = readQuery("./sql_script/showPrereq.sql");
                 query_after_process = processQuery(query,courseNum,1);
+                query_after_process = processQuery(query_after_process,userID,1);       
                 queryDB(query_after_process,1);
                 free(query);
                 free(query_after_process);
@@ -640,7 +654,7 @@ void enrollPage(char* userID)
             query_after_process = processQuery(query_after_process,courseNum,2);
             query_after_process = processQuery(query_after_process,queryTime->quarter,3);
             query_after_process = processQuery(query_after_process,queryTime->year,4);
-            printf("%s\n",query_after_process);
+  //          printf("%s\n",query_after_process);
             queryDB(query_after_process,0);
             printf("\n");
             printf("\n");

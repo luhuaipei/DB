@@ -1,3 +1,4 @@
+DROP procedure IF EXISTS `changeADDR`;
 CREATE PROCEDURE changeADDR
 (IN userId int(11),
  IN newADDR varchar(50))

@@ -1,3 +1,5 @@
+DROP procedure IF EXISTS `enroll`;
+delimiter //
 CREATE procedure enroll(
 IN userId int(11),
 IN classId char(8),
@@ -24,4 +26,5 @@ if passedPre = numOfPre THEN
 		set pre = numOfPre+1;
 
  END IF;
-END
+END //
+DELIMITER ;
